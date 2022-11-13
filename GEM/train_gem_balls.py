@@ -21,7 +21,7 @@ def train(scenarioes, labels = [0, 1], c = [1, 1]):
     R = x[1:]
     L = y[1:]
 
-    support = [None] * len(labels)
+    support = [[]] * len(labels)
 
     while not complete:
         opposite_label = (y_c + 1) % 2
@@ -34,20 +34,18 @@ def train(scenarioes, labels = [0, 1], c = [1, 1]):
         opposite_positions = search_indexes_by_label(L, opposite_label)
         support_positions = opposite_positions[0:min(c[opposite_label], len(opposite_positions))]
 
-        current_support = []
-        if support[opposite_label] != None:
-            current_support = support[opposite_label]
-        
-        current_support.append(get_elements_by_indexes(R, support_positions))
+        support[opposite_label].append(get_elements_by_indexes(R, support_positions))
 
         if len(opposite_positions) < c[opposite_label]:
             complete = True
 
-            classifier.append([x_c, math.inf, y_c])
+            distance_to_append = math.inf
+            classifier.append([x_c, distance_to_append, y_c])
 
-            current_support.append([math.inf] * len(x[0]))
+            support[opposite_label].append([math.inf] * len(x_c))
         else:
-            classifier.append([x_c, distances[support_positions[-1]], y_c])
+            distance_to_append = distances[support_positions[-1]] # floor to nearest float: // 1e-15 * 1e-15
+            classifier.append([x_c, distance_to_append, y_c])
 
             x_c = R[support_positions[-1]]
             y_c = L[support_positions[-1]]
@@ -55,10 +53,8 @@ def train(scenarioes, labels = [0, 1], c = [1, 1]):
             R = R[min(support_positions[-1]+1, len(R)-1):]
             L = L[min(support_positions[-1]+1, len(L)-1):]
 
-        support[opposite_label] = current_support
-
-    cardinalities_per_label = [None] * len(labels)
-    scenarioes_per_label = [None] * len(labels)
+    cardinalities_per_label = [0] * len(labels)
+    scenarioes_per_label = [0] * len(labels)
     for i in range(len(labels)):
         cardinalities_per_label[i] = len(support[i])
         scenarioes_per_label[i] = number_of_scenarios_with_given_label(scenarioes, labels[i])

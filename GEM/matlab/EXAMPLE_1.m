@@ -30,15 +30,15 @@ LOOFalsePositive=kn/Nn
 %they are valid simultaneusly with confidence 1-2*beta 
 %(e.g., confidence 90% when beta=0.05);
 beta=0.05;
-[GuaranteedFalseNegativeRate,GuaranteedFalsePositiveRate]=validategemballs(kp,kn,Np,Nn,beta,beta)
+%%[GuaranteedFalseNegativeRate,GuaranteedFalsePositiveRate]=validategemballs(kp,kn,Np,Nn,beta,beta)
 
 %In this simulation example, we can check with fresh simulated data 
 %that the bounds provided by theory were satisfied:
 
 Xtest=rand(10000,5)-0.5;
 
-Ytest=usegemballs(classifier,Xtest);
-Ytrue=double(sum(Xtest,2)>0);
+Ytest=usegemballs(classifier,Xtrain);
+Ytrue=double(sum(Xtrain,2)>0);
 
 FalseNegativeRateOnNewData=length(find( Ytrue==1 & Ytest==0))/length(find(Ytrue==1))
 FalsePositiveRateOnNewData=length(find( Ytrue==0 & Ytest==1))/length(find(Ytrue==0))
