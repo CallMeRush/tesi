@@ -44,7 +44,8 @@ def train(scenarioes, labels = [0, 1], c = [1, 1]):
 
             support[opposite_label].append([math.inf] * len(x_c))
         else:
-            distance_to_append = distances[support_positions[-1]] # floor to nearest float: // 1e-15 * 1e-15
+            # to floor to nearest float: // 1e-15 * 1e-15
+            distance_to_append = distances[support_positions[-1]] 
             classifier.append([x_c, distance_to_append, y_c])
 
             x_c = R[support_positions[-1]]

@@ -37,8 +37,8 @@ beta=0.05;
 
 Xtest=rand(10000,5)-0.5;
 
-Ytest=usegemballs(classifier,Xtrain);
-Ytrue=double(sum(Xtrain,2)>0);
+Ytest=usegemballs(classifier,Xtest);
+Ytrue=double(sum(Xtest,2)>0);
 
 FalseNegativeRateOnNewData=length(find( Ytrue==1 & Ytest==0))/length(find(Ytrue==1))
 FalsePositiveRateOnNewData=length(find( Ytrue==0 & Ytest==1))/length(find(Ytrue==0))

@@ -10,7 +10,7 @@ def get_scenarioes(stock, time_period, time_after, start, end):
     for i in range(len(time_after)):
         scenarioes = []
         for j in range(len(df) - (time_period + time_after[i])):
-            relative_values = open_values[j:j+time_period+time_after[i]] / open_values[i]
+            relative_values = open_values[j:j+time_period+time_after[i]] / open_values[j + time_period-1]
             y = 0
             if relative_values[time_period-1] < relative_values[-1]:
                 y = 1
