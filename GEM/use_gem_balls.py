@@ -10,7 +10,7 @@ def use_gem_balls(classifier, x):
         found = False
         j = 0
         while not found:
-            if norm(classifier[j][0][0:d], x[i]) < classifier[j][1]:
+            if norm(classifier[j][0], x[i]) < classifier[j][1]:
                 found = True
                 y[i] = classifier[j][2]
             else:

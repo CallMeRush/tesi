@@ -12,6 +12,8 @@ for i in range(len(x_train)):
     for j in range(len(x_train[0])):
         x_train[i][j] -= 0.5
 
+x_test = x_train
+
 y_train = []
 for i in range(len(x_train)):
     """a = kstest(x_train[i], norm.cdf).pvalue
@@ -39,10 +41,10 @@ beta=0.05;
 print("GuaranteedFalseNegativeRate: " + str(GuaranteedFalseNegativeRate))
 print("GuaranteedFalsePositiveRate: " + str(GuaranteedFalsePositiveRate))
 
-x_test = random.rand(n_test, 7)
+"""x_test = random.rand(n_test, 7)
 for i in range(len(x_test)):
     for j in range(len(x_test[0])):
-        x_test[i][j] -= 0.5
+        x_test[i][j] -= 0.5"""
 
 y_test = use_gem_balls(classifier, x_test)
 

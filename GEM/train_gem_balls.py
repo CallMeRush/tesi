@@ -1,9 +1,9 @@
 import math
 
 def train(scenarioes, labels = [0, 1], c = [1, 1]):
-    # c0 and c1: complexity parameters; increasing the value of c0 generates 1-labelled balls of larger size so providing higher sensitivity
+    # c values: complexity parameters; increasing the value of c[0] generates 1-labelled balls of larger size so providing higher sensitivity
 
-    # Check if there are only scenarios labeled 0 and 1
+    # Check if there are only scenarios labelled as the given labels
     for s in scenarioes:
         if s[1] not in labels:
             print("ERROR: the scenarios are not correctly labelled.")
@@ -21,7 +21,7 @@ def train(scenarioes, labels = [0, 1], c = [1, 1]):
     R = x[1:]
     L = y[1:]
 
-    support = [[]] * len(labels)
+    support = [None] * len(labels)
 
     while not complete:
         opposite_label = (y_c + 1) % 2
@@ -34,7 +34,11 @@ def train(scenarioes, labels = [0, 1], c = [1, 1]):
         opposite_positions = search_indexes_by_label(L, opposite_label)
         support_positions = opposite_positions[0:min(c[opposite_label], len(opposite_positions))]
 
-        support[opposite_label].append(get_elements_by_indexes(R, support_positions))
+        support_array = support[opposite_label]
+        if support_array == None:
+            support_array = []
+        if len(support_positions) > 0: # the last support point is at infinity
+            support_array.append(get_elements_by_indexes(R, support_positions))
 
         if len(opposite_positions) < c[opposite_label]:
             complete = True
@@ -42,7 +46,7 @@ def train(scenarioes, labels = [0, 1], c = [1, 1]):
             distance_to_append = math.inf
             classifier.append([x_c, distance_to_append, y_c])
 
-            support[opposite_label].append([math.inf] * len(x_c))
+            support_array.append([math.inf] * len(x_c))
         else:
             # to floor to nearest float: // 1e-15 * 1e-15
             distance_to_append = distances[support_positions[-1]] 
@@ -53,6 +57,8 @@ def train(scenarioes, labels = [0, 1], c = [1, 1]):
             
             R = R[min(support_positions[-1]+1, len(R)-1):]
             L = L[min(support_positions[-1]+1, len(L)-1):]
+
+        support[opposite_label] = support_array
 
     cardinalities_per_label = [0] * len(labels)
     scenarioes_per_label = [0] * len(labels)
