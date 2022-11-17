@@ -1,7 +1,6 @@
 import math
-from numpy import linalg as LA
 
-def use_gem_balls(classifier, x):
+def use_old(classifier, x):
     n = len(x)
     d = len(x[0])
     
@@ -11,11 +10,18 @@ def use_gem_balls(classifier, x):
         found = False
         j = 0
         while not found:
-            if LA.norm(x[i] - classifier[j][0]) < classifier[j][1]:
+            if norm(x[i], classifier[j][0]) < classifier[j][1]:
                 found = True
                 y[i] = classifier[j][2]
             else:
                 j += 1
 
     return y
+
+
+def norm(p1, p2):
+    result = 0
+    for i in range(len(p1)):
+        result += (p1[i] - p2[i]) ** 2
+    return math.sqrt(result)
 

@@ -1,13 +1,13 @@
-from GEM.train_gem_balls import train
-from GEM.validate_gem_balls import validate
+from GEM.train_gem_balls import train_gem_balls
+from GEM.validate_gem_balls import validate_gem_balls
 from GEM.use_gem_balls import use_gem_balls
 from fetch_data import get_scenarioes
 
 time_period = 25
 time_after = [1, 2, 3, 5, 7, 10, 15, 25, 40, 60, 90]
 
-scenarioes_train = get_scenarioes('BTC-USD', time_period, time_after, '2022-10-17', '2022-10-23')
-scenarioes_test = get_scenarioes('BTC-USD', time_period, time_after, '2022-10-24', '2022-10-25')
+scenarioes_train = get_scenarioes('BTC-USD', time_period, time_after, '2022-10-20', '2022-10-27')
+scenarioes_test = get_scenarioes('BTC-USD', time_period, time_after, '2022-10-28', '2022-10-29')
 #scenarioes_test = get_scenarioes('BTC-USD', time_period, time_after, '2022-11-08', '2022-11-09')
 
 min1 = 10
@@ -25,18 +25,16 @@ while time_period < 50:
         current_train = scenarioes_train[i]
         current_test = scenarioes_test[i]    
 
-        [classifier, card, num] = train(current_train)
+        [classifier, card, num] = train_gem_balls(current_train)
 
         LOOFalseNegative=card[1]/num[1]
         LOOFalsePositive=card[0]/num[0]
 
         beta=0.05;
-        [GuaranteedFalseNegativeRate,GuaranteedFalsePositiveRate]= validate(card, num,[beta,beta])
+        [GuaranteedFalseNegativeRate, GuaranteedFalsePositiveRate] = validate_gem_balls(card, num,[beta,beta])
 
-        if GuaranteedFalseNegativeRate != None:
-            print("GuaranteedFalseNegativeRate: " + str(GuaranteedFalseNegativeRate))
-        if GuaranteedFalsePositiveRate != None:
-            print("GuaranteedFalsePositiveRate: " + str(GuaranteedFalsePositiveRate))
+        print("GuaranteedFalseNegativeRate: " + str(GuaranteedFalseNegativeRate))
+        print("GuaranteedFalsePositiveRate: " + str(GuaranteedFalsePositiveRate))
 
         y_test = use_gem_balls(classifier, [row[0] for row in current_test])
 

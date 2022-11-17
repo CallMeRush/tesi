@@ -1,8 +1,10 @@
-import math
-import numpy as np
-from numpy import linalg as LA
+# Implementation without numpy. It has (almost) the same results (distances are 
+# the same until at least the fifth decimal point), but with bigger data sizes 
+# it is sigificantly slower. 
 
-def train_gem_balls(scenarios, labels = [0, 1], c = [1, 1]):
+import math
+
+def train_old(scenarios, labels = [0, 1], c = [1, 1]):
     # c values: complexity parameters; increasing the value of c[0] generates 1-labelled balls of larger size so providing higher sensitivity
 
     # Check if there are only scenarios labelled as the given labels
@@ -13,14 +15,14 @@ def train_gem_balls(scenarios, labels = [0, 1], c = [1, 1]):
 
     classifier = []
     complete = False
+    
+    x = [row[0] for row in scenarios]
+    y = [row[1] for row in scenarios]
 
-    x = np.array(column(scenarios, 0))
-    y = np.array(column(scenarios, 1))
-
-    x_c = x[0, :]
+    x_c = x[0]
     y_c = y[0]
 
-    R = x[1:, :]
+    R = x[1:]
     L = y[1:]
 
     support = [None] * len(labels)
@@ -29,11 +31,11 @@ def train_gem_balls(scenarios, labels = [0, 1], c = [1, 1]):
         opposite_label = (y_c + 1) % 2
 
         [distances, indexes] = calculate_distances(R, x_c)
-        
-        R = R[indexes]
-        L = L[indexes]
 
-        opposite_positions = np.where(L == opposite_label)[0]
+        R = order_based_on_indexes(R, indexes)
+        L = order_based_on_indexes(L, indexes)
+
+        opposite_positions = search_indexes_by_label(L, opposite_label, labels)
         support_positions = opposite_positions[0:min(c[opposite_label], len(opposite_positions))]
 
         support_array = support[opposite_label]
@@ -41,13 +43,18 @@ def train_gem_balls(scenarios, labels = [0, 1], c = [1, 1]):
             support_array = []
 
         if len(opposite_positions) < c[opposite_label]:
-            classifier.append([x_c, math.inf, y_c])
-            support_array.append([math.inf] * len(x_c))
-
             complete = True
+
+            distance_to_append = math.inf
+            classifier.append([x_c, distance_to_append, y_c])
+
+            support_array.append([math.inf] * len(x_c))
         else:
-            classifier.append([x_c, distances[support_positions[-1]], y_c])
-            support_array.append(R[support_positions])
+            # to floor to nearest float: // 1e-15 * 1e-15
+            distance_to_append = distances[support_positions[-1]] 
+            classifier.append([x_c, distance_to_append, y_c])
+
+            support_array.append(get_elements_by_indexes(R, support_positions))
 
             x_c = R[support_positions[-1]]
             y_c = L[support_positions[-1]]
@@ -61,7 +68,7 @@ def train_gem_balls(scenarios, labels = [0, 1], c = [1, 1]):
     scenarios_per_label = [0] * len(labels)
     for i in range(len(labels)):
         cardinalities_per_label[i] = len(support[i])
-        scenarios_per_label[i] = len(np.where(y == labels[i])[0])
+        scenarios_per_label[i] = number_of_scenarios_with_given_label(scenarios, labels[i])
 
     return classifier, cardinalities_per_label, scenarios_per_label
 
@@ -71,25 +78,34 @@ def column(matrix, i):
 
 
 def calculate_distances(R, x_c):
-    distances = [[]] * len(R)
+    if len(R) == len(x_c) and all(isinstance(ele, list) for ele in R): # R contains the last x
+        distance = 0
+        for i in range(len(R)):
+            distance += (x_c[i] - R[i]) ** 2
+        return [math.sqrt(distance)], [0]
+
+    distances = []
     for i in range(len(R)):
-        distances[i] = [LA.norm(x_c - R[i]), i]
+        distance = 0
+        for j in range(len(R[i])):
+            distance += (x_c[j] - R[i][j]) ** 2
+        distances.append([math.sqrt(distance), i])
 
     distances.sort() # it automatically sorts by the first values of matrix
-    return column(distances, 0), column(distances, 1)
+    return [row[0] for row in distances], [row[1] for row in distances]
 
 
-"""def order_based_on_indexes(array, indexes):
+def order_based_on_indexes(array, indexes):
     if indexes == [0]: # we have the last x
         return array
 
     new_array = []
     for index in indexes:
         new_array.append(array[index])
-    return new_array"""
+    return new_array
 
 
-"""def search_indexes_by_label(array, label):
+def search_indexes_by_label(array, label, labels):
     if len(array) == 1: # We have the last x
         if array[0] == label:
             return array
@@ -99,20 +115,20 @@ def calculate_distances(R, x_c):
     for i in range(len(array)):
         if array[i] == label:
             new_array.append(i)
-    return new_array"""
+    return new_array
 
 
-"""def get_elements_by_indexes(array, indexes):
+def get_elements_by_indexes(array, indexes):
     new_array = []
     for index in indexes:
         new_array.append(array[index])
-    return new_array"""
+    return new_array
 
 
-"""def number_of_scenarios_with_given_label(array, label):
+def number_of_scenarios_with_given_label(array, label):
     count = 0
     for element in array:
         if element[1] == label:
             count += 1
-    return count"""
+    return count
 
